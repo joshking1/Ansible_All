@@ -1,0 +1,80 @@
+
+# Using Ansible to verify configurations
+
+This article demonstrates how to use Ansible to verify your configurations
+
+Example 1
+
+In this example, I have six hosts of various Linux distributions and versions. Because the actual memory reported can vary, I'm going to check for memory between 800 MB and 1100 MB. The goal is for hosts that meet the criteria to pass with changed=0 and hosts that fail the criteria to output changed=1:
+
+- name: assert
+  hosts: all
+
+  tasks:
+
+  - name: check if memory is between 800 and 1100MB
+    assert:
+      that:
+        - ansible_memtotal_mb | int >= 800
+        - ansible_memtotal_mb | int <= 1100
+      fail_msg: "Memory is {{ ansible_memtotal_mb }}MB not 1024MB"
+    register: result
+    changed_when:
+      - result.evaluated_to is defined
+      - result.evaluated_to == False
+    failed_when: False
+
+Example 2
+
+Another useful configuration comparison strategy is to use a checksum tool like md5sum to compare files.
+
+In this example, we are setting variables for the md5sums of three files that we want to check for consistency. Our task then uses the stat module to calculate the MD5 checksum of each file and compare it to the defined variable. Once again, we are using the changed_when function to make the comparison and render a "changed" state when there isn't a match.
+
+What is MD5 used for? # MD5 is primarily used to authenticate files. It's much easier to use the MD5 hash to check a copy of a file against an original than to check bit by bit to see if the two copies match. MD5 was once used for data security and encryption, but these days its primary use is authentication
+
+
+---
+- name: compare
+  hosts: all
+  gather_facts: no
+ 
+  vars:
+ 
+    std_conf_crontab: 'c39252b11aad842fcb75e05c6a27eef8'
+    std_conf_lvm: '2d90187abd40dbcb6fc6de41640fd022'
+    std_conf_resolv: 'db323688118c844a76ebd6c70508b434'
+
+  tasks:
+
+  - name: compare config files
+    stat:
+      path: '{{ item.file }}'
+      checksum_algorithm: md5
+    register: result
+    changed_when: item.md5sum != result.stat.checksum
+    failed_when: False
+    loop:
+      - { file: /etc/crontab, md5sum: '{{ std_conf_crontab }}' }
+      - { file: /etc/lvm/lvm.conf, md5sum: '{{ std_conf_lvm }}' }
+      - { file: /etc/resolv.conf, md5sum: '{{ std_conf_resolv }}'} 
+  
+
+
+Example 3
+
+My final example is a way to check the contents of a file for a specific item. One way to do this is by using the shell module and using grep.
+
+---
+- name: grep
+  hosts: all
+  gather_facts: no
+
+  tasks:
+
+  - name: grep for nameserver
+    shell: grep 'nameserver 192.168.0.1' /etc/resolv.conf
+    register: result
+    changed_when: result.rc != 0
+    failed_when: False
+
+Here again, we are using the combination of changed_when and failed_when to manipulate the output to be useful. By registering the output of grep to the result variable, we can then check the return code of the command and find out if the desired nameserver string is present. More complex commands can be used if needed.

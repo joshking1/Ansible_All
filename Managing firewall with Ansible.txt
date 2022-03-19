@@ -1,0 +1,83 @@
+
+# Managing Firewall Rules with Ansible 
+
+Managing firewall rules are a tedious task but indispensable for a secure infrastructure.  While all the cloud providers are having their own ACL and firewall rule offerings to protect your cloud resources.
+
+In this article, we are going to see. How to manage your CentOS or Linux firewall firewall-d rules with Ansible firewallD module
+
+Here we list few examples of the Ansible FirewallD module to manage the services and ports.
+
+Validate if the HTTP/HTTPS service is Open or blocked
+
+You can use a command  nmap to see if the port is blocked or open, If you see the state as closed which means it is blocked by firewalld
+
+Command to use 
+
+# nmap -p 80 -Pn mwiapp01
+
+
+Now let us enable HTTP and HTTPS services that would open the port 80 and 443
+
+Enabling HTTP and HTTPS Service
+Here is the Ansible playbook with firewallD module to enable HTTP and HTTPS service that inturns open up port 80 and 443
+
+This playbook is designed to run on the localhost and can be chagned to run remote by removing the connection: local and updating hosts parameter
+
+---
+ - name: FirewallD
+   hosts: localhost
+   connection: local
+   tasks:
+    - name: FirewallD rules
+      firewalld:
+        permanent: yes
+        immediate: yes
+        service: "{{ item }}"
+        state: enabled
+      with_items:
+       - http
+       - https
+
+Enabling & Disabling Multiple Ports on different Zones
+Here is the Generic playbook which can help you enable and disable, various different ports on different zones.
+
+This simple playbook can be used for managing entire host firewall rules at once.
+
+---
+ - name: FirewallD
+   hosts: localhost
+   connection: local
+   tasks:
+    - name: FirewallD rules
+      firewalld:
+        permanent: yes
+        immediate: yes
+        port: "{{item.port}}/{{item.proto}}"
+        state: "{{item.state}}"
+        zone: "{{item.zone}}"
+      with_items:
+       - {port: "8080", proto: "tcp", state: "disabled", zone: "public" }
+       - {port: "161-162", proto: "udp", state: "disabled", zone: "internal" }
+       - {port: "9001", proto: "tcp", state: "enabled", zone: "public" }
+
+
+Creating Port Redirection using Ansible Firewall Rich Rule
+Here is the ansible-playbook example to setup  Port Forwarding or Port redirection with Ansible FirewallD module
+
+In this task, we are going to set up a port forwarding from port 8080 to port 80 and serve the static page from Nginx
+
+---
+ - name: FirewallD
+   hosts: localhost
+   connection: local
+   tasks:
+    - name: FirewallD rules
+      firewalld:
+        permanent: yes
+        immediate: yes
+        rich_rule: "{{ item }}"
+        state: enabled
+      with_items:
+       - 'rule forward-port port=8080 protocol=tcp to-port=80 family=ipv4'
+
+

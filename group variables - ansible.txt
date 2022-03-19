@@ -1,0 +1,37 @@
+# Configuration: group variables
+
+Group variables are variables that are applied to groups of servers. They can be used in templates and in playbooks to customize behavior and to provide easily-changed settings and parameters. They are stored in a directory called group_vars in the same location as your inventory. Here is lamp_haproxy’s group_vars/all file. As you might expect, these variables are applied to all of the machines in your inventory:
+
+---
+httpd_port: 80
+ntpserver: 192.0.2.23
+
+This is a YAML file, and you can create lists and dictionaries for more complex variable structures. In this case, we are just setting two variables, one for the port for the web server, and one for the NTP server that our machines should use for time synchronization.
+
+
+Here’s another group variables file. This is group_vars/dbservers which applies to the hosts in the dbservers group:
+
+---
+mysqlservice: mysqld
+mysql_port: 3306
+dbuser: root
+dbname: foodb
+upassword: usersecret
+
+If you look in the example, there are group variables for the webservers group and the lbservers group, similarly.
+
+These variables are used in a variety of places. You can use them in playbooks, like this, in roles/db/tasks/main.yml:
+
+- name: Create Application Database
+  mysql_db:
+    name: "{{ dbname }}"
+    state: present
+
+- name: Create Application DB User
+  mysql_user:
+    name: "{{ dbuser }}"
+    password: "{{ upassword }}"
+    priv: "*.*:ALL"
+    host: '%'
+    state: present
+
