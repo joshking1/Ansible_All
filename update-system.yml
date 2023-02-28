@@ -1,0 +1,13 @@
+- name: Update Amazon Linux 2
+  hosts: aws
+  become: true
+  tasks:
+    - name: Update OS
+      yum:
+        name: "*"
+        state: latest
+        
+ 
+ # This playbook uses the "yum" module to update all packages on the system to the latest version. 
+ # The "become" parameter is used to elevate the user's privileges to root so that the updates can be installed.
+ # To run this playbook, save the code to a file called "update.yml", and then execute the playbook using the following command:
