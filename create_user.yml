@@ -1,0 +1,54 @@
+---
+- name: Create and manage user accounts
+  hosts: all
+  become: true
+  
+  tasks:
+  - name: Create user account for Apollo
+    user:
+      name: apollo
+      state: present
+      password: "{{ 'Apollo@123' | password_hash('sha512') }}"
+      update_password: always
+      
+  - name: Create user account for Ahmed
+    user:
+      name: ahmed
+      state: present
+      password: "{{ 'Ahmed@123' | password_hash('sha512') }}"
+      update_password: always
+      
+  - name: Create user account for Christine
+    user:
+      name: christine
+      state: present
+      password: "{{ 'Christine@123' | password_hash('sha512') }}"
+      update_password: always
+      
+  - name: Create user account for Rose
+    user:
+      name: rose
+      state: present
+      password: "{{ 'Rose@123' | password_hash('sha512') }}"
+      update_password: always
+      
+  - name: Create user account for Ronnie
+    user:
+      name: ronnie
+      state: present
+      password: "{{ 'Ronnie@123' | password_hash('sha512') }}"
+      update_password: always
+      
+  - name: Create user account for David
+    user:
+      name: david
+      state: present
+      password: "{{ 'David@123' | password_hash('sha512') }}"
+      update_password: always
+      
+  - name: Force users to change password on first login
+    lineinfile:
+      path: /etc/login.defs
+      regexp: '^#?CHFN_RESTRICT'
+      line: 'CHFN_RESTRICT yes'
+      backup: yes
