@@ -1,0 +1,92 @@
+---
+- name: Install and configure packages on Amazon Linux
+  hosts: aws
+  become: true
+
+  tasks:
+    # Update and upgrade the server
+    - name: Update and upgrade server
+      yum:
+        name: '*'
+        state: latest
+
+    # Install or update packages
+    - name: Install or update Docker package
+      yum:
+        name: docker
+        state: latest
+      register: docker_pkg
+
+    - name: Install or update AWS CLI package
+      yum:
+        name: awscli
+        state: latest
+      register: awscli_pkg
+
+    - name: Install or update Git package
+      yum:
+        name: git
+        state: latest
+      register: git_pkg
+
+    - name: Install or update Ansible package
+      yum:
+        name: ansible
+        state: latest
+      register: ansible_pkg
+
+    - name: Install or update Apache package
+      yum:
+        name: httpd
+        state: latest
+      register: apache_pkg
+
+    - name: Install or update MySQL package
+      yum:
+        name: mysql-server
+        state: latest
+      register: mysql_pkg
+
+    - name: Install or update Java JDK package
+      yum:
+        name: java-1.8.0-openjdk-devel
+        state: latest
+      register: java_pkg
+
+    # Start and enable services
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      when: docker_pkg.changed
+
+    - name: Start and enable Apache service
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: apache_pkg.changed
+
+    - name: Start and enable MySQL service
+      service:
+        name: mysqld
+        state: started
+        enabled: yes
+      when: mysql_pkg.changed
+
+    # Print message if package already exists and is up-to-date
+    - name: Print message for existing and up-to-date packages
+      debug:
+        msg: "{{ item.name }} package exists and is up-to-date"
+      loop:
+        - { name: docker, result: "{{ docker_pkg }}" }
+        - { name: awscli, result: "{{ awscli_pkg }}" }
+        - { name: git, result: "{{ git_pkg }}" }
+        - { name: ansible, result: "{{ ansible_pkg }}" }
+        - { name: httpd, result: "{{ apache_pkg }}" }
+        - { name: mysql-server, result: "{{ mysql_pkg }}" }
+        - { name: phpMyAdmin, result: "{{ phpmyadmin_pkg }}" }
+        - { name: java-1.8.0-openjdk-devel, result: "{{ java_pkg }}" }
+        - { name: jenkins, result: "{{ jenkins_pkg }}" }
+      when: item.result is not defined or item.result.changed
