@@ -1,0 +1,66 @@
+---
+- name: Install Packages
+  hosts: aws
+  become: true
+
+  tasks:
+    - name: Update and upgrade packages
+      yum:
+        name: "*"
+        state: latest
+      register: yum_update
+
+    - name: Install Docker
+      yum:
+        name: docker
+        state: latest
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install Git
+      yum:
+        name: git
+        state: latest
+
+    - name: Install Java
+      yum:
+        name: java-1.8.0-openjdk
+        state: latest
+
+    - name: Install Ansible
+      pip:
+        name: ansible
+
+    - name: Install AWS CLI version 2
+      block:
+        - name: Install dependencies for AWS CLI
+          yum:
+            name:
+              - unzip
+              - curl
+            state: latest
+        - name: Download AWS CLI version 2 installer
+          get_url:
+            url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+            dest: /tmp/awscliv2.zip
+        - name: Extract AWS CLI installer
+          command: unzip /tmp/awscliv2.zip -d /tmp/
+        - name: Install AWS CLI
+          command: /tmp/aws/install
+
+    - name: Install Apache
+      yum:
+        name:
+          - httpd
+          - mod_ssl
+        state: latest
+
+    - name: Start Apache service
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
