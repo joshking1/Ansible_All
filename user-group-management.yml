@@ -1,0 +1,51 @@
+---
+- name: Manage Users and Groups
+  hosts: aws
+  become: true
+
+  tasks:
+  - name: Create group
+    group:
+      name: developers
+      state: present
+
+  - name: Create user
+    user:
+      name: johndoe
+      password: "$6$rounds=656000$SAbpb7xd8nGO$uIfFyDnl1R/xbA/tl8PBLX9iZo3MLr0bYH2zNkTc1U6HZcO6A7et6ZZvU6/WZJ6mPp/C/UwF6fI76zKUx05ef."
+      groups: developers
+      state: present
+      shell: /bin/bash
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+
+  - name: Update user details
+    user:
+      name: johndoe
+      comment: John Doe
+      state: present
+
+  - name: Remove user from group
+    user:
+      name: johndoe
+      groups: developers
+      append: no
+
+  - name: Delete user
+    user:
+      name: johndoe
+      state: absent
+
+  - name: Delete group
+    group:
+      name: developers
+      state: absent
+
+# Notes 
+# This playbook performs the following tasks:
+# Creates a group called "developers".
+# Creates a user named "johndoe", adds the user to the "developers" group, and sets their password to a hashed value.
+# Updates the user's comment field.
+# Removes the user from the "developers" group.
+# Deletes the user.
+# Deletes the "developers" group.
