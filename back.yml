@@ -1,0 +1,57 @@
+---
+- name: Disaster Recovery Playbook
+  hosts: all
+  gather_facts: true
+
+  vars:
+    backup_directory: /mnt/backups
+    backup_file: "{{ inventory_hostname }}-backup-{{ ansible_date_time.iso8601 }}.tar.gz"
+    backup_exclude_files: /mnt/backups,/proc,/sys,/tmp,/run,/mnt,/media,/lost+found
+
+  tasks:
+    # Step 1: Create backup directory
+    - name: Create backup directory
+      become: true
+      file:
+        path: "{{ backup_directory }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    # Step 2: Take backup
+    - name: Take backup
+      become: true
+      shell: "tar -czvf {{ backup_directory }}/{{ backup_file }} --exclude={{ backup_exclude_files }} /"
+      register: backup_result
+
+    # Step 3: Verify backup
+    - name: Verify backup
+      fail:
+        msg: "Backup failed for {{ inventory_hostname }}"
+      when: backup_result.rc != 0
+
+    # Step 4: Test restore
+    - name: Test restore
+      become: true
+      shell: "tar -xzvf {{ backup_directory }}/{{ backup_file }} -C /"
+      register: restore_result
+
+    # Step 5: Verify restore
+    - name: Verify restore
+      fail:
+        msg: "Restore failed for {{ inventory_hostname }}"
+      when: restore_result.rc != 0
+
+    # Step 6: Test failover
+    - name: Test failover
+      become: true
+      shell: "systemctl stop docker"
+      # Replace <service_name> with the name of the service that needs to be stopped for failover testing
+      register: failover_result
+
+    # Step 7: Verify failover
+    - name: Verify failover
+      fail:
+        msg: "Failover failed for {{ inventory_hostname }}"
+      when: failover_result.rc != 0
