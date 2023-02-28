@@ -1,0 +1,43 @@
+---
+- name: Secure SSH configuration playbook
+  hosts: your_server_hostname
+  become: yes
+
+  tasks:
+    - name: Backup sshd_config file
+      become: yes
+      copy:
+        src: /etc/ssh/sshd_config
+        dest: /etc/ssh/sshd_config.bak
+      register: sshd_config_backup
+
+    - name: Configure SSH to use more secure protocol
+      become: yes
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?Protocol'
+        line: 'Protocol 2'
+      register: sshd_config_protocol
+
+    - name: Disable root login
+      become: yes
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PermitRootLogin'
+        line: 'PermitRootLogin no'
+      register: sshd_config_rootlogin
+
+    - name: Restart SSH service
+      become: yes
+      service:
+        name: sshd
+        state: restarted
+      register: sshd_restart
+
+# Here's a brief explanation of what the playbook does:
+
+# The playbook backs up the sshd_config file to sshd_config.bak.
+# It configures SSH to use the more secure protocol version 2.
+# It disables root login by setting PermitRootLogin to no.
+# Finally, it restarts the SSH service to apply the new configuration.
+# You can run this playbook using the command ansible-playbook secure-ssh.yml. Just replace your_server_hostname with the hostname or IP address of your server.
