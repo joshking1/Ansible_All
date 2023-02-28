@@ -1,0 +1,34 @@
+---
+- name: Install and Configure Firewall
+  hosts: aws
+  become: true
+  tasks:
+    - name: Install firewalld
+      yum:
+        name: firewalld
+        state: present
+
+    - name: Start firewalld and enable at boot
+      service:
+        name: firewalld
+        state: started
+        enabled: true
+
+    - name: Add SSH service to firewall
+      firewalld:
+        service: ssh
+        zone: public
+        permanent: true
+        state: enabled
+
+    - name: Add HTTP and HTTPS services to firewall
+      firewalld:
+        service: http https
+        zone: public
+        permanent: true
+        state: enabled
+
+    - name: Reload firewalld
+      service:
+        name: firewalld
+        state: reloaded
