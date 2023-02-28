@@ -1,0 +1,29 @@
+---
+- name: Set permissions on log files for user apollo
+  hosts: your_server_hostname
+  become: yes
+
+  tasks:
+    - name: Find log files
+      find:
+        paths: /var/log
+        patterns: "*.log"
+        recurse: yes
+        file_type: file
+      register: log_files
+
+    - name: Set permissions on log files for user apollo
+      file:
+        path: "{{ item.path }}"
+        owner: apollo
+        group: apollo
+        mode: "0644"
+      loop: "{{ log_files.files }}"
+      
+ # Notes 
+ 
+# In this playbook, we first use the find module to search for all log files in the directory "/var/log" with the ".log" extension, and register the results in a variable called log_files. Then, we use the file module to set the owner, group, and permissions for each log file found in the previous step, using the loop directive to iterate over the log_files.files list.
+
+# Finally, we set the owner and group to "apollo" and the permissions to "0644" so that the user "apollo" has read and write access to the log files.
+
+# You can run this playbook using the ansible-playbook command and specifying the inventory file and the playbook file:
