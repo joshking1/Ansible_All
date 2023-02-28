@@ -1,0 +1,31 @@
+---
+- name: Security Compliance
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install Lynis
+      yum:
+        name: lynis
+        state: latest
+
+    - name: Run Lynis security audit
+      shell: lynis audit system
+      register: lynis_output
+
+    - name: Print Lynis output
+      debug:
+        var: lynis_output.stdout_lines
+
+# Lynis is an open-source security auditing tool that checks a system for security vulnerabilities and provides guidance on how to remediate them. Lynis performs various checks, including checks for malware, insecure configuration settings, weak passwords, and more. By running a Lynis audit on a system, you can identify security risks and take steps to improve the overall security posture of the system.
+# Lynis is an important tool for several reasons:
+
+# It provides an easy way to perform a security audit: Lynis automates the process of performing a security audit, making it easier for system administrators to identify and address security vulnerabilities.
+
+# It covers a wide range of security checks: Lynis checks for a wide range of security vulnerabilities, including malware, insecure configuration settings, weak passwords, and more. This comprehensive coverage makes Lynis a valuable tool for identifying security risks.
+
+# It provides guidance on how to remediate vulnerabilities: Lynis not only identifies security vulnerabilities but also provides guidance on how to remediate them. This guidance can help system administrators take concrete steps to improve the security of their systems.
+
+# It is open source: Lynis is an open-source tool, meaning that it is freely available for anyone to use and modify. This openness promotes collaboration and ensures that the tool remains up-to-date and effective.
+
+# Overall, running a Lynis audit is an important step in improving the security of a system. By identifying and remediating vulnerabilities, you can help protect your system from security threats and ensure that it remains secure over time.
