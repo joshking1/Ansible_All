@@ -1,0 +1,21 @@
+---
+- name: Set Timezone
+  hosts: all
+  become: true
+
+  vars:
+    timezone: America/New_York
+
+  tasks:
+  - name: Update timezone
+    timezone:
+      name: "{{ timezone }}"
+
+# In this playbook, we are setting the timezone variable to "America/New_York", which is the timezone we want to set on the target servers. You can customize this variable to any timezone that you need.
+
+# The "timezone" module is used to update the timezone settings on the target servers. It takes the "name" parameter, which is the timezone value that we set in the "timezone" variable.
+
+# Once you run this playbook, it will update the timezone settings on all the target servers to the specified timezone. You can modify this playbook to suit your needs by changing the timezone value and other settings. Don't forget to test your playbook before running it in a production environment!
+
+
+
