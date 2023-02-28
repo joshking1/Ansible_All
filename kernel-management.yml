@@ -1,0 +1,27 @@
+---
+- name: Update Amazon Linux Kernel
+  hosts: aws
+  become: true
+
+  tasks:
+  - name: Check if kernel is up-to-date
+    shell: rpm -q kernel | awk -F"-" '{print $2}'
+    register: kernel_version
+
+  - name: Update kernel if not up-to-date
+    yum:
+      name: kernel
+      state: latest
+    when: kernel_version.stdout != "4.14.238-185.511.amzn2"
+
+  - name: Reboot server if kernel updated
+    reboot:
+    when: kernel_version.stdout != "4.14.238-185.511.amzn2"
+
+# In this playbook, we are first using the "shell" module to check the version of the currently installed kernel on all servers. We are storing the output of this command in the "kernel_version" variable using the "register" keyword.
+
+# Next, we are using the "yum" module to update the kernel to the latest version if it is not up-to-date. We are using the "when" keyword to apply this task only if the currently installed kernel version is not the latest version.
+
+# Finally, if the kernel is updated, we are using the "reboot" module to reboot the server. We are using the "when" keyword to apply this task only if the kernel is updated.
+
+# You can customize this playbook to suit your needs by changing the version of the kernel that you want to install or the servers that you want to manage. Don't forget to test your playbook before running it in a production environment!
