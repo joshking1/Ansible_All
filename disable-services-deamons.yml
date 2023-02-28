@@ -1,0 +1,24 @@
+- name: Disable unnecessary services and daemons
+  hosts: all
+  become: true
+  tasks:
+    - name: Stop and disable service
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      loop:
+        - rpcbind
+        - avahi-daemon
+        - cups
+        - isc-dhcp-server
+        - slapd
+        - vsftpd
+        - xinetd
+        - telnet
+        - tftp
+        - rsh.socket
+        - rlogin.socket
+        - rexec.socket
+
+# You might get an error if the services do not exist
