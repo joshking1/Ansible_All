@@ -1,0 +1,35 @@
+---
+- name: Install tomcat Server
+  hosts: aws
+  become: yes
+
+  tasks:
+    - name: Update packages
+      yum:
+        name: '*'
+        state: latest
+      become: yes
+
+    - name: Upgrade packages
+      yum:
+        name: '*'
+        state: latest
+        exclude: kernel*
+      become: yes
+
+    - name: Clear cache
+      command: yum clean all
+      become: yes
+
+    - name: Remove outdated packages
+      yum:
+        name: '*'
+        state: latest
+        autoremove: yes
+      become: yes
+
+    - name: Install Tomcat server
+      yum:
+        name: tomcat
+        state: latest
+      become: yes
