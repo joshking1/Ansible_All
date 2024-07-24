@@ -4,6 +4,12 @@
   become: yes
 
   tasks:
+    - name: Ensure Docker SDK for Python is installed
+      pip:
+        name: docker
+        state: present
+        executable: /usr/bin/pip3
+
     - name: Create Jenkins home directory
       file:
         path: /home/jenkins_home
