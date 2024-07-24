@@ -1,0 +1,30 @@
+---
+- name: Deploy Jenkins Container
+  hosts: aws
+  become: yes
+
+  tasks:
+    - name: Create Jenkins home directory
+      file:
+        path: /home/jenkins_home
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Run Jenkins container
+      docker_container:
+        name: jenkins
+        image: jenkins/jenkins
+        state: started
+        restart_policy: unless-stopped
+        user: root
+        ports:
+          - "8080:8080"
+          - "50000:50000"
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+          - /usr/bin/docker:/usr/bin/docker
+          - /home/jenkins_home:/var/jenkins_home
+        env:
+          JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
